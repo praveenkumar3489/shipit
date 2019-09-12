@@ -1,33 +1,32 @@
 const receipe = require('../models/receipeModel'),
-    passport = require('passport'),
-    _ = require('lodash');
-
+	passport = require('passport'),
+	_ = require('lodash');
 
 exports.list = function(req, res) {
-	console.log('query params', req.query);
-	let filter = {},
-		meta = [];
+	let filter = {};
+	let reqmeta = [];
+	let result = [];
 	if (req.query.meta) {
-		meta = req.query.meta.split(',');
-		filter = { meta: { $in: meta } };
+		reqmeta = req.query.meta.split(',');
+		filter = { meta: { $in: reqmeta } };
 	}
-	console.log('filter', filter);
 
 	receipe.find(filter, (err, docs) => {
 		if (err) {
 			console.log('err', err);
 		}
-		console.log(docs.length);
-		console.log(meta.length);
-		if (meta.length > 2) {
-			for (let doccount = 0; doccount < docs.length - 1; doccount++) {
-				var matchingcount = _intersection(docs[doccount][meta], meta);
-				console.log(matchingcount);
+		result = docs;
+		if (reqmeta.length > 1) {
+			for (let doccount = 0; doccount < result.length; doccount++) {
+				let matchingcount = _.intersection(result[doccount]['meta'], reqmeta);
+				result[doccount] = { ...result[doccount].toObject(), matchcount: matchingcount.length };
 			}
-		} else {
-			let result = docs;
-		}
 
-		res.status(200).send(docs);
+			result = _.orderBy(result, ['matchcount'], ['desc']);
+			res.status(200).send(result);
+		} else {
+			result = docs;
+			res.status(200).send(result);
+		}
 	});
-}
+};

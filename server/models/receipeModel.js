@@ -1,5 +1,5 @@
 const mongoose = require('mongoose'),
-Schema = mongoose.Schema;
+	Schema = mongoose.Schema;
 
 const receipeSchema = new Schema(
 	{
@@ -36,6 +36,9 @@ const receipeSchema = new Schema(
 				}
 			}
 		],
+		favourites: {
+			type: Number
+		},
 		ingredients: [
 			{
 				name: {

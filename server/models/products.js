@@ -12,10 +12,14 @@ var ProductSchema = new Schema({
         required: true,
         'default': shortId.generate
     },
-    name: String,
+    name: {
+        type: String,
+        unique: true,
+        required: true
+    },
     price: {
     	'dollar': Number,
-    	'ruppes': Number,
+    	'rupees': Number,
     	'gbp': Number
     },
     description: String,

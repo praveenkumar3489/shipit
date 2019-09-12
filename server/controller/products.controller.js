@@ -24,10 +24,7 @@ exports.list = function(req, res, next){
 		res.jsonp({
 			'message':'success',
 			'resultMessage':'Product list is successfully.',
-			'results':data,
-			'page':page,
-			'perPage':perPage,
-			'totalItems':cnt
+			'results':data
 		})
 		if (err) return res.status(400).send({
 	          	message: JSON.stringify(err)
@@ -132,8 +129,33 @@ exports.update = function(req, res, next) {
 // return message, resultmessage, result
 
 exports.create = function(req, res, next) {
-    let productDetail = req.body;
-    let products =  new Products(req.body);
+	let productInfo = {}
+    if(_.has(req.body, 'price')){
+		productInfo['dollar'] = req.body.price * config.exchangePrice.dollar;
+		productInfo['rupees'] = req.body.price * config.exchangePrice.rupees
+		productInfo['gbp'] = req.body.price * config.exchangePrice.gbp
+	}
+	let productDetail = req.body;
+	console.log('productDetail >>', productDetail);
+	console.log('productDetail.categories >>', typeof(productDetail.categories));
+	if(_.has(productDetail, 'categories')){
+		if(typeof(productDetail.categories) ==='string') {
+			productDetail.categories = productDetail.categories.split(',')
+		}
+		if(Array.isArray(productDetail.categories)) {
+			productDetail.categories = productDetail.categories
+		}
+	}
+	if(_.has(productDetail, 'meta')){
+		if(typeof(productDetail.meta) ==='string') {
+			productDetail.meta = productDetail.meta.split(',')
+		}
+		if(Array.isArray(productDetail.meta)) {
+			productDetail.meta = productDetail.meta
+		}
+	}
+	productDetail['price'] = productInfo;
+    let products =  new Products(productDetail);
     products.save(function(err, data) {
     	console.log(err);
 		if (err) return res.status(400).jsonp({
